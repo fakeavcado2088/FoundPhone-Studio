@@ -284,7 +284,8 @@ function PhoneRuntime({
       setPinOpen(false);
       if (!hundredDayNoticeShown.current) {
         hundredDayNoticeShown.current = true;
-        setBanner(["내 너구리❤️: 100天快乐 我的애기", "내 너구리❤️: 我爱你"]);
+        setBanner(["내 너구리❤️: 100天快乐 我的애기"]);
+        setTimeout(() => setBanner(["내 너구리❤️: 我爱你"]), 1000);
         setTimeout(() => setBanner([]), 6000);
       }
       event("password", pin);

@@ -225,7 +225,7 @@ export function MymyKakao(p: SkinProps) {
                   "永远爱你",
                   "下一个100天 1000天也要和哥在一起",
                 ];
-                const days = ["2026-11-01", "2026-11-02", "2026-11-03"];
+                const days = ["2026-11-01", "2026-11-01", "2026-11-01"];
                 const index = hundredDayProgress;
                 setSent([
                   ...sent,

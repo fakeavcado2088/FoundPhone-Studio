@@ -23,7 +23,7 @@ export default defineConfig(({ command }) => ({
         globPatterns: ["**/*.{js,css,html,svg,json,txt,png,jpg}"],
         // Story media is embedded in work.json; allow larger authored stories
         // to remain available offline instead of failing the Pages build.
-        maximumFileSizeToCacheInBytes: 10000000,
+        maximumFileSizeToCacheInBytes: 20000000,
       },
     }),
   ],

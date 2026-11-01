@@ -64,13 +64,22 @@ function Back({ onClick }: { onClick: () => void }) {
 export function MymyKakao(p: SkinProps) {
   const [tab, setTab] = useSkinState<string>(p, "mymyTab", "聊天"),
     [sent, setSent] = useSkinState<string[]>(p, "mymyKktSent", []),
+    [hundredDayProgress, setHundredDayProgress] = useSkinState<number>(
+      p,
+      "mymyHundredDayProgress",
+      0,
+    ),
     [draft, setDraft] = useState(""),
     [query, setQuery] = useState(""),
     [menu, setMenu] = useState(false);
   const currentGroup = p.items.find(
     (i) => i.title === p.thread && i.meta.groupOnly === "true",
   );
-  const list = grouped(p.items),
+  const list = grouped(p.items).sort((a, b) => {
+      const aPinned = a.items.some((item) => item.meta.pinned === "true");
+      const bPinned = b.items.some((item) => item.meta.pinned === "true");
+      return Number(bPinned) - Number(aPinned);
+    }),
     messages = [
       ...p.items.filter(
         (i) => i.title === p.thread && i.meta.groupOnly !== "true",
@@ -129,33 +138,41 @@ export function MymyKakao(p: SkinProps) {
                 : "";
               return (
                 <Fragment key={m.id}>
-                {day !== previousDay && dateLabel && <time className="bubble-date">{dateLabel}</time>}
-                <div className={"kzm " + (m.outgoing ? "kzmy" : "kzot") + (run.first ? " first" : "")}>
-                  {!m.outgoing && run.first && (
-                    <>
-                      <div className="kzmav">
-                        <Avatar name={m.sender} src={m.avatar} />
-                      </div>
-                      <div className="kzmn">{m.sender}</div>
-                    </>
+                  {day !== previousDay && dateLabel && (
+                    <time className="bubble-date">{dateLabel}</time>
                   )}
-                  {m.outgoing && run.last && (
-                    <span className="kzt">
-                      {m.meta.unread || ""}
-                      <br />
-                      {m.time.slice(-5)}
-                    </span>
-                  )}
-                  <button
-                    className={"kzbub" + (m.media ? " kzimg" : "")}
-                    onClick={() => m.meta.local !== "true" && read(p, m)}
+                  <div
+                    className={
+                      "kzm " +
+                      (m.outgoing ? "kzmy" : "kzot") +
+                      (run.first ? " first" : "")
+                    }
                   >
-                    {m.media ? <Media item={m} /> : m.body}
-                  </button>
-                  {!m.outgoing && run.last && (
-                    <span className="kzt">{m.time.slice(-5)}</span>
-                  )}
-                </div>
+                    {!m.outgoing && run.first && (
+                      <>
+                        <div className="kzmav">
+                          <Avatar name={m.sender} src={m.avatar} />
+                        </div>
+                        <div className="kzmn">{m.sender}</div>
+                      </>
+                    )}
+                    {m.outgoing && run.last && (
+                      <span className="kzt">
+                        {m.meta.unread || ""}
+                        <br />
+                        {m.time.slice(-5)}
+                      </span>
+                    )}
+                    <button
+                      className={"kzbub" + (m.media ? " kzimg" : "")}
+                      onClick={() => m.meta.local !== "true" && read(p, m)}
+                    >
+                      {m.media ? <Media item={m} /> : m.body}
+                    </button>
+                    {!m.outgoing && run.last && (
+                      <span className="kzt">{m.time.slice(-5)}</span>
+                    )}
+                  </div>
                 </Fragment>
               );
             })}
@@ -187,9 +204,39 @@ export function MymyKakao(p: SkinProps) {
             </button>
             <input
               aria-label="KKT消息"
-              placeholder="输入消息"
+              placeholder={
+                p.thread === "내 너구리❤️" &&
+                !draft.trim() &&
+                hundredDayProgress < 3
+                  ? "点击这里回复"
+                  : "输入消息"
+              }
               value={draft}
               maxLength={2000}
+              onClick={() => {
+                if (
+                  p.thread !== "내 너구리❤️" ||
+                  draft.trim() ||
+                  hundredDayProgress >= 3
+                )
+                  return;
+                const replies = [
+                  "我也爱你",
+                  "永远爱你",
+                  "下一个100天 1000天也要和哥在一起",
+                ];
+                const days = ["2026-11-01", "2026-11-02", "2026-11-03"];
+                const index = hundredDayProgress;
+                setSent([
+                  ...sent,
+                  JSON.stringify([
+                    p.thread,
+                    replies[index],
+                    `${days[index]} 21:41`,
+                  ]),
+                ]);
+                setHundredDayProgress(index + 1);
+              }}
               onChange={(e) => setDraft(e.target.value)}
             />
             <Smile size={22} />
@@ -279,7 +326,12 @@ export function MymyKakao(p: SkinProps) {
                   >
                     <Avatar name={last.sender || g.title} src={last.avatar} />
                     <span className="kzkn">
-                      <b>{g.title}</b>
+                      <b>
+                        {g.title}
+                        {last.meta.pinned === "true" && (
+                          <small className="kzk-pin">置顶</small>
+                        )}
+                      </b>
                       <small>
                         {last.meta.groupOnly === "true"
                           ? `${last.meta.groupCount || "多人"}人群组`

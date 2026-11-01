@@ -628,3 +628,14 @@
   width: 25px;
   height: 25px;
 }
+.kzk-pin {
+  display: inline-block;
+  margin-left: 6px;
+  border-radius: 8px;
+  padding: 1px 5px;
+  color: #7b61a8;
+  background: #eee8f8;
+  font-size: 10px;
+  font-weight: 500;
+  vertical-align: 1px;
+}

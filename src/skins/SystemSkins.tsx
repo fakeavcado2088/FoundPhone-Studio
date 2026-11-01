@@ -166,7 +166,11 @@ export function ContactsSkin(p: Props) {
             <h4 className="native-section">{g}</h4>
             {items
               .filter((i) => (i.folder || "所有联系人") === g)
-              .sort((a, b) => a.title.localeCompare(b.title, "zh-CN"))
+              .sort(
+                (a, b) =>
+                  Number(b.favorite) - Number(a.favorite) ||
+                  a.title.localeCompare(b.title, "zh-CN"),
+              )
               .map((i) => (
                 <Row
                   key={i.id}
@@ -409,11 +413,14 @@ export function NotesSkin(p: Props) {
   );
 }
 export function CalendarSkin(p: Props) {
-  const initialDate = [...p.items]
-    .map((i) => i.time.slice(0, 10))
-    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
-    .sort()
-    .at(-1) ?? p.virtualTime?.slice(0, 10) ?? "2026-10-30";
+  const initialDate =
+    [...p.items]
+      .map((i) => i.time.slice(0, 10))
+      .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+      .sort()
+      .at(-1) ??
+    p.virtualTime?.slice(0, 10) ??
+    "2026-10-30";
   const [month, setMonth] = useState(Number(initialDate.slice(5, 7)) - 1),
     [year, setYear] = useState(Number(initialDate.slice(0, 4)) || 2026),
     [day, setDay] = useState(Number(initialDate.slice(8, 10)) || 1);
@@ -540,6 +547,10 @@ export function MailSkin(p: Props) {
 }
 export function ClockSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "闹钟");
+  const visibleItems = items.filter(
+    (item) =>
+      meta(item, "type") === (tab === "世界时钟" ? "world-clock" : "alarm"),
+  );
   const [enabled, setEnabled] = useSkinState<string[]>(p, "alarms", []),
     [seconds, setSeconds] = useState(0),
     [running, setRunning] = useState(false);
@@ -574,7 +585,7 @@ export function ClockSkin(p: Props) {
             </div>
           </div>
         ) : (
-          items.map((i) => (
+          visibleItems.map((i) => (
             <div className="alarm-row" key={i.id}>
               <button onClick={() => p.onItem(i)}>
                 <time>{meta(i, "clock", i.time.slice(-5))}</time>

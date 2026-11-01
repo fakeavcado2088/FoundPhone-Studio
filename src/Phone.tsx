@@ -140,7 +140,8 @@ function PhoneRuntime({
   const [keyboard, setKeyboard] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const appSnapshots = useRef(new Map<string, HTMLElement>());
-  const [banner, setBanner] = useState("");
+  const [banner, setBanner] = useState<string[]>([]);
+  const hundredDayNoticeShown = useRef(false);
   const noticesSeen = useRef(0);
   const [contextApp, setContextApp] = useState("");
   const [deviceScale, setDeviceScale] = useState(0.84);
@@ -281,6 +282,11 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
+      if (!hundredDayNoticeShown.current) {
+        hundredDayNoticeShown.current = true;
+        setBanner(["내 너구리❤️: 100天快乐 我的애기", "내 너구리❤️: 我爱你"]);
+        setTimeout(() => setBanner([]), 6000);
+      }
       event("password", pin);
     } else {
       setPinError("密码不正确");
@@ -295,8 +301,8 @@ function PhoneRuntime({
   useEffect(() => {
     const count = s.notifications.length;
     if (!locked && work.phone.notifications && count > noticesSeen.current) {
-      setBanner(s.notifications.at(-1) || "");
-      const timer = setTimeout(() => setBanner(""), 4500);
+      setBanner([s.notifications.at(-1) || ""]);
+      const timer = setTimeout(() => setBanner([]), 4500);
       noticesSeen.current = count;
       return () => clearTimeout(timer);
     }
@@ -320,7 +326,11 @@ function PhoneRuntime({
         <div
           style={
             work.phone.wallpaper.startsWith("data:image/")
-              ? { backgroundImage: `url("${work.phone.wallpaper}")`, backgroundSize: "cover", backgroundPosition: "center" }
+              ? {
+                  backgroundImage: `url("${work.phone.wallpaper}")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
               : undefined
           }
           className={`phone-screen wallpaper-${work.phone.wallpaper} ${locked ? "is-locked" : ""} ${app ? "in-app" : ""} ${keyboard ? "keyboard-open" : ""}`}
@@ -683,24 +693,29 @@ function PhoneRuntime({
               </div>
             </div>
           )}
-          {banner && !locked && (
-            <button
-              className="device-banner"
-              onClick={() => {
-                setBanner("");
-                setPanel("notification");
-              }}
-            >
-              <AppIcon
-                id={notificationContent(banner, work.apps).appId}
-                small
-              />
-              <span>
-                <strong>{notificationContent(banner, work.apps).title}</strong>
-                <span>{notificationContent(banner, work.apps).body}</span>
-              </span>
-            </button>
-          )}
+          {!locked &&
+            banner.map((notice, index) => {
+              const content = notificationContent(notice, work.apps);
+              const isHundredDayNotice = content.title === "내 너구리❤️";
+              return (
+                <button
+                  className="device-banner"
+                  key={`${notice}-${index}`}
+                  style={{ top: `${58 + index * 68}px` }}
+                  onClick={() => {
+                    setBanner([]);
+                    if (isHundredDayNotice) setApp("kakao");
+                    else setPanel("notification");
+                  }}
+                >
+                  <AppIcon id={content.appId} small />
+                  <span>
+                    <strong>{content.title}</strong>
+                    <span>{content.body}</span>
+                  </span>
+                </button>
+              );
+            })}
           {panel === "switcher" && (
             <div className="device-switcher">
               <div className="switcher-cards">

@@ -67,9 +67,14 @@ export function MymyKakao(p: SkinProps) {
     [draft, setDraft] = useState(""),
     [query, setQuery] = useState(""),
     [menu, setMenu] = useState(false);
+  const currentGroup = p.items.find(
+    (i) => i.title === p.thread && i.meta.groupOnly === "true",
+  );
   const list = grouped(p.items),
     messages = [
-      ...p.items.filter((i) => i.title === p.thread),
+      ...p.items.filter(
+        (i) => i.title === p.thread && i.meta.groupOnly !== "true",
+      ),
       ...sent.flatMap((raw, index) => {
         try {
           const entry: unknown = JSON.parse(raw);
@@ -199,7 +204,11 @@ export function MymyKakao(p: SkinProps) {
           {menu && (
             <div className="mymy-local-menu">
               <strong>{p.thread}</strong>
-              <p>一对一聊天</p>
+              <p>
+                {currentGroup
+                  ? `群组 · ${currentGroup.meta.groupCount || "多人"}人`
+                  : "一对一聊天"}
+              </p>
               <button onClick={() => setMenu(false)}>完成</button>
             </div>
           )}
@@ -271,7 +280,13 @@ export function MymyKakao(p: SkinProps) {
                     <Avatar name={last.sender || g.title} src={last.avatar} />
                     <span className="kzkn">
                       <b>{g.title}</b>
-                      <small>{tab === "好友" ? last.sender : last.body}</small>
+                      <small>
+                        {last.meta.groupOnly === "true"
+                          ? `${last.meta.groupCount || "多人"}人群组`
+                          : tab === "好友"
+                            ? last.sender
+                            : last.body}
+                      </small>
                     </span>
                     <span className="kzkmt">
                       {last.time.slice(-5)}

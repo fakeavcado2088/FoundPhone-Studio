@@ -21,7 +21,9 @@ export default defineConfig(({ command }) => ({
       workbox: {
         clientsClaim: true,
         globPatterns: ["**/*.{js,css,html,svg,json,txt,png,jpg}"],
-        maximumFileSizeToCacheInBytes: 4000000,
+        // Story media is embedded in work.json; allow larger authored stories
+        // to remain available offline instead of failing the Pages build.
+        maximumFileSizeToCacheInBytes: 10000000,
       },
     }),
   ],

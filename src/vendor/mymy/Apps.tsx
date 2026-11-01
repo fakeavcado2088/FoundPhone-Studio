@@ -80,6 +80,7 @@ export function MymyKakao(p: SkinProps) {
       const bPinned = b.items.some((item) => item.meta.pinned === "true");
       return Number(bPinned) - Number(aPinned);
     }),
+    contactAvatar = p.items.find((i) => i.title === p.thread && !i.outgoing && i.avatar)?.avatar,
     messages = [
       ...p.items.filter(
         (i) => i.title === p.thread && i.meta.groupOnly !== "true",
@@ -101,6 +102,7 @@ export function MymyKakao(p: SkinProps) {
               body: entry[1],
               time: entry[2],
               sender: p.owner || "机主",
+              avatar: contactAvatar || "",
               outgoing: true,
               meta: { local: "true" },
             }),
@@ -214,28 +216,26 @@ export function MymyKakao(p: SkinProps) {
               value={draft}
               maxLength={2000}
               onClick={() => {
-                if (
-                  p.thread !== "내 너구리❤️" ||
-                  draft.trim() ||
-                  hundredDayProgress >= 3
-                )
-                  return;
+                if (p.thread !== "내 너구리❤️" || draft.trim() || hundredDayProgress >= 3) return;
                 const replies = [
                   "我也爱你",
                   "永远爱你",
                   "下一个100天 1000天也要和哥在一起",
                 ];
-                const days = ["2026-11-01", "2026-11-01", "2026-11-01"];
                 const index = hundredDayProgress;
-                setSent([
-                  ...sent,
-                  JSON.stringify([
-                    p.thread,
-                    replies[index],
-                    `${days[index]} 21:41`,
-                  ]),
+                setSent((current) => [
+                  ...current,
+                  JSON.stringify([p.thread, replies[index], `2026-11-01 21:${41 + index}`]),
                 ]);
                 setHundredDayProgress(index + 1);
+                setDraft("");
+                requestAnimationFrame(() => {
+                  const input = document.querySelector<HTMLInputElement>('[aria-label="KKT消息"]');
+                  if (input) {
+                    input.value = replies[index];
+                    input.dispatchEvent(new Event("input", { bubbles: true }));
+                  }
+                });
               }}
               onChange={(e) => setDraft(e.target.value)}
             />

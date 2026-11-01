@@ -78,7 +78,6 @@ export function MymyKakao(p: SkinProps) {
       const bPinned = b.items.some((item) => item.meta.pinned === "true");
       return Number(bPinned) - Number(aPinned);
     }),
-    contactAvatar = p.items.find((i) => i.title === p.thread && !i.outgoing && i.avatar)?.avatar,
     ownerAvatar = p.items.find((i) => i.title === p.thread && i.outgoing && i.avatar)?.avatar,
     messages = [
       ...p.items.filter(

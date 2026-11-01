@@ -409,9 +409,14 @@ export function NotesSkin(p: Props) {
   );
 }
 export function CalendarSkin(p: Props) {
-  const [month, setMonth] = useState(8),
-    [year, setYear] = useState(2026),
-    [day, setDay] = useState(1);
+  const initialDate = [...p.items]
+    .map((i) => i.time.slice(0, 10))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .sort()
+    .at(-1) ?? p.virtualTime?.slice(0, 10) ?? "2026-10-30";
+  const [month, setMonth] = useState(Number(initialDate.slice(5, 7)) - 1),
+    [year, setYear] = useState(Number(initialDate.slice(0, 4)) || 2026),
+    [day, setDay] = useState(Number(initialDate.slice(8, 10)) || 1);
   const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
   const list = p.items.filter((i) =>
     i.time.startsWith(`${prefix}-${String(day).padStart(2, "0")}`),

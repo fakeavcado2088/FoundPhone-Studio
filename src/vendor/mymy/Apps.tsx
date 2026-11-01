@@ -1,7 +1,7 @@
 /* React/data adapters for dudwo5/Mymy UI templates: kt/ktn/KHD/bub,
  * igHome/igProfile/igDM/igSheet, xHome. See NOTICE.txt for permission.
  * Author content, DOM globals, timers and media dependencies are excluded. */
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Search,
@@ -117,15 +117,15 @@ export function MymyKakao(p: SkinProps) {
           <div className="msgs kk" ref={scroll}>
             {messages.map((m, i) => {
               const run = messageRun(messages, i);
+              const day = m.time.slice(0, 10);
+              const previousDay = messages[i - 1]?.time.slice(0, 10);
+              const dateLabel = day
+                ? `${day.slice(0, 4)}年${Number(day.slice(5, 7))}月${Number(day.slice(8, 10))}日`
+                : "";
               return (
-                <div
-                  key={m.id}
-                  className={
-                    "kzm " +
-                    (m.outgoing ? "kzmy" : "kzot") +
-                    (run.first ? " first" : "")
-                  }
-                >
+                <Fragment key={m.id}>
+                {day !== previousDay && dateLabel && <time className="bubble-date">{dateLabel}</time>}
+                <div className={"kzm " + (m.outgoing ? "kzmy" : "kzot") + (run.first ? " first" : "")}>
                   {!m.outgoing && run.first && (
                     <>
                       <div className="kzmav">
@@ -151,6 +151,7 @@ export function MymyKakao(p: SkinProps) {
                     <span className="kzt">{m.time.slice(-5)}</span>
                   )}
                 </div>
+                </Fragment>
               );
             })}
             {!messages.length && <Blank />}
@@ -198,9 +199,7 @@ export function MymyKakao(p: SkinProps) {
           {menu && (
             <div className="mymy-local-menu">
               <strong>{p.thread}</strong>
-              <p>
-                群成员：{[...new Set(messages.map((m) => m.sender))].join("、")}
-              </p>
+              <p>一对一聊天</p>
               <button onClick={() => setMenu(false)}>完成</button>
             </div>
           )}

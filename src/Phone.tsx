@@ -135,13 +135,13 @@ function PhoneRuntime({
   const [app, setApp] = useState("");
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
+  const [unlockRound, setUnlockRound] = useState(0);
   const [pinOpen, setPinOpen] = useState(false);
   const [quickCamera, setQuickCamera] = useState(false);
   const [keyboard, setKeyboard] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const appSnapshots = useRef(new Map<string, HTMLElement>());
   const [banner, setBanner] = useState<string[]>([]);
-  const hundredDayNoticeShown = useRef(false);
   const noticesSeen = useRef(0);
   const [contextApp, setContextApp] = useState("");
   const [deviceScale, setDeviceScale] = useState(0.84);
@@ -282,12 +282,10 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
-      if (!hundredDayNoticeShown.current) {
-        hundredDayNoticeShown.current = true;
-        setBanner(["내 너구리❤️: 100天快乐 我的애기"]);
-        setTimeout(() => setBanner(["내 너구리❤️: 我爱你"]), 1000);
-        setTimeout(() => setBanner([]), 6000);
-      }
+      setUnlockRound((round) => round + 1);
+      setBanner(["내 너구리❤️: 100天快乐 我的애기"]);
+      setTimeout(() => setBanner(["내 너구리❤️: 我爱你"]), 1000);
+      setTimeout(() => setBanner([]), 6000);
       event("password", pin);
     } else {
       setPinError("密码不正确");
@@ -452,7 +450,7 @@ function PhoneRuntime({
               />
             ) : app && app !== "appstore" ? (
               <AppWindow
-                key={app}
+                key={`${app}-${app === "kakao" ? unlockRound : 0}`}
                 className={`app-screen engine-${plugin.engine} skin-${app}`}
                 creator={creator}
                 origin={launchOrigin}

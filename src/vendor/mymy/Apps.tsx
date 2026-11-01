@@ -63,12 +63,10 @@ function Back({ onClick }: { onClick: () => void }) {
 }
 export function MymyKakao(p: SkinProps) {
   const [tab, setTab] = useSkinState<string>(p, "mymyTab", "聊天"),
-    [sent, setSent] = useSkinState<string[]>(p, "mymyKktSent", []),
-    [hundredDayProgress, setHundredDayProgress] = useSkinState<number>(
-      p,
-      "mymyHundredDayProgress",
-      0,
-    ),
+    // This is a one-unlock interaction, so keep replies only in component state.
+    // Refreshing or reopening the phone starts the exchange from the beginning.
+    [sent, setSent] = useState<string[]>([]),
+    [hundredDayProgress, setHundredDayProgress] = useState(0),
     [draft, setDraft] = useState(""),
     [query, setQuery] = useState(""),
     [menu, setMenu] = useState(false);
@@ -81,6 +79,7 @@ export function MymyKakao(p: SkinProps) {
       return Number(bPinned) - Number(aPinned);
     }),
     contactAvatar = p.items.find((i) => i.title === p.thread && !i.outgoing && i.avatar)?.avatar,
+    ownerAvatar = p.items.find((i) => i.title === p.thread && i.outgoing && i.avatar)?.avatar,
     messages = [
       ...p.items.filter(
         (i) => i.title === p.thread && i.meta.groupOnly !== "true",
@@ -102,7 +101,7 @@ export function MymyKakao(p: SkinProps) {
               body: entry[1],
               time: entry[2],
               sender: p.owner || "机主",
-              avatar: contactAvatar || "",
+              avatar: ownerAvatar || "",
               outgoing: true,
               meta: { local: "true" },
             }),
@@ -229,13 +228,6 @@ export function MymyKakao(p: SkinProps) {
                 ]);
                 setHundredDayProgress(index + 1);
                 setDraft("");
-                requestAnimationFrame(() => {
-                  const input = document.querySelector<HTMLInputElement>('[aria-label="KKT消息"]');
-                  if (input) {
-                    input.value = replies[index];
-                    input.dispatchEvent(new Event("input", { bubbles: true }));
-                  }
-                });
               }}
               onChange={(e) => setDraft(e.target.value)}
             />

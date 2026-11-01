@@ -24,6 +24,7 @@ const native = new Set([
   "find",
   "calculator",
   "settings",
+  "kakao",
   "wechat",
   "whatsapp",
   "instagram",
@@ -81,7 +82,20 @@ function DrawnArtwork({ id, date }: { id: string; date?: string }) {
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
   };
-  if (id === "phone" || id === "messages") {
+  if (id === "kakao") {
+    background = "#fee500";
+    art = (
+      <>
+        <path
+          fill="#3b1e1e"
+          d="M32 12C18.7 12 8 20 8 30c0 6.2 4.2 11.6 10.7 14.8L16 54l12-5.2c1.3.2 2.6.3 4 .3 13.3 0 24-8 24-18S45.3 12 32 12Z"
+        />
+        <text x="32" y="34" textAnchor="middle" fill="#fee500" fontSize="8" fontWeight="700" letterSpacing=".3">
+          TALK
+        </text>
+      </>
+    );
+  } else if (id === "phone" || id === "messages") {
     background = "#23d553";
     art =
       id === "phone" ? (
